@@ -1,5 +1,6 @@
 package com.example.scan.scan;
 
+import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -8,24 +9,45 @@ import android.provider.MediaStore;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
+import android.util.SparseArray;
 import android.view.View;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import java.io.InputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import android.content.Context;
+
+import com.google.android.gms.vision.Detector;
+import com.google.android.gms.vision.Frame;
+import com.google.android.gms.vision.Frame.Builder;
+import com.google.android.gms.vision.text.TextBlock;
+import com.google.android.gms.vision.text.TextRecognizer;
+
+
+
+
+
 
 public class homepage extends AppCompatActivity {
     Button btnscan;
     Button btnPicLib;
+    ImageView pictureOcrView;
+
+    private static final String LOG_TAG = "testOCR.java";
+
+    private static final String TAG = "testOCR.java";
+
     private static final int
         REQUEST_IMAGE_CAPTURE = 1, PICK_IMAGE = 100;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
         setContentView(R.layout.activity_homepage);
         Intent intent = getIntent();
         String s = intent.getStringExtra("username");
@@ -87,22 +109,26 @@ public class homepage extends AppCompatActivity {
         }
 
         // IF PICTURE IS TAKEN FROM PHOTO LIBRARY
-        if (requestCode == PICK_IMAGE){
+        if (requestCode == PICK_IMAGE)
+        {
             Uri imageUri = data.getData();
-
             try {
                 imageBitmap = decodeUri(imageUri);
-            } catch (FileNotFoundException e) { // this should never happen
+                }
+            catch (FileNotFoundException e)
+            { // this should never happen
                 e.printStackTrace();
                 return;
             }
         }
+        pictureOcrView=(ImageView) findViewById(R.id.imageView2);
+        pictureOcrView.setImageBitmap(imageBitmap);
 
         assert imageBitmap != null; // this should never happen
 
         // PREPROCESSING STUFF GOES HERE
         // for encapsulation
-        imageBitmap = PreProcessing.doStuff(imageBitmap);
+//        imageBitmap = PreProcessing.doStuff(imageBitmap);
 
         // OCR STUFF GOES HERE
         /* OCR TEAM
@@ -114,13 +140,33 @@ public class homepage extends AppCompatActivity {
             If pre processing methods are not working then remove them.
         */
 
+        Context context = getApplicationContext();
+        TextRecognizer ocrFrame = new TextRecognizer.Builder(context).build();
+
+        Frame frame = new Frame.Builder().setBitmap(imageBitmap).build();
+        if (ocrFrame.isOperational()){
+            Log.e(TAG, "Textrecognizer is operational");
+        }
+
+        Log.e(TAG, "nothing works i hate everything");
+
+        SparseArray<TextBlock> textBlocks = ocrFrame.detect(frame);
+
+        for (int i = 0; i < textBlocks.size(); i++) {
+            Log.e(TAG, "this oiasdjasdpiasjdlasjdlkasjd happening?");
+            TextBlock textBlock = textBlocks.get(textBlocks.keyAt(i));
+            Log.i(LOG_TAG, textBlock.getValue());
+        }
+
+        Log.e(TAG, "Is this happening?");
+
         // just getting a pre-processed image onto the screen
-        ByteArrayOutputStream stream = new ByteArrayOutputStream();
-        imageBitmap.compress(Bitmap.CompressFormat.PNG, 100, stream);
-        byte[] byteArray = stream.toByteArray();
-        Intent intent = new Intent(this, DisplayImage.class);
-        intent.putExtra("picture", byteArray);
-        startActivity(intent);
+//        ByteArrayOutputStream stream = new ByteArrayOutputStream();
+//        imageBitmap.compress(Bitmap.CompressFormat.PNG, 100, stream);
+//        byte[] byteArray = stream.toByteArray();
+//        Intent intent = new Intent(this, displayimage.class);
+//        intent.putExtra("picture", byteArray);
+//        startActivity(intent);
 
         // text view stuff
     }

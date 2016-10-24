@@ -7,7 +7,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.widget.ImageView;
 
-public class DisplayImage extends AppCompatActivity {
+public class displayimage extends AppCompatActivity {
 
     /*
     This activity is TEMPORARY. Just used for testing. It just displays the image clicked by camera
